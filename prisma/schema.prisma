@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Content {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  description String
+  coverImage  String
+  status      String   @default("draft")
+  publishDate DateTime?
+  isTrending  Boolean  @default(false)
+  rating      Float    @default(0)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  tags Tag[]
+
+  viewStats ViewStat[]
+
+  @@index([categoryId])
+  @@index([slug])
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  contents Content[]
+
+  @@index([slug])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  contents  Content[]
+
+  @@index([slug])
+}
+
+model SponsorBlock {
+  id       String  @id @default(cuid())
+  title    String
+  image    String
+  link     String
+  position String
+  isActive Boolean @default(true)
+}
+
+model ViewStat {
+  id        String   @id @default(cuid())
+  contentId String
+  viewDate  DateTime @default(now())
+  count     Int      @default(1)
+
+  content Content @relation(fields: [contentId], references: [id])
+
+  @@index([contentId])
+}
