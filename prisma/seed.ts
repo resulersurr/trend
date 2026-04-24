@@ -10,9 +10,13 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 type SeedContent = {
+  title: string;
   slug: string;
+  excerpt: string;
+  description: string;
+  coverImage: string;
+  categorySlug: string;
   tagIds: number[];
-  [key: string]: unknown;
 };
 
 async function main() {
@@ -36,12 +40,13 @@ async function main() {
   const data: SeedContent[] = [/* senin data array */];
 
   for (const c of data) {
-    const { tagIds, ...rest } = c;
+    const { tagIds, categorySlug, ...rest } = c;
     await prisma.content.upsert({
       where: { slug: c.slug },
       update: {},
       create: {
         ...rest,
+        category: { connect: { slug: categorySlug } },
         tags: { connect: tagIds.map((i: number) => ({ id: tags[i].id })) },
       },
     });
